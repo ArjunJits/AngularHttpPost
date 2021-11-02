@@ -1,0 +1,168 @@
+------------------------------
+Step1: Create the Member.ts
+------------------------------
+export class Member{
+    constructor( public custid:number,public clientid:number,
+       public mbrid:number,public membername:string){}
+}
+---------------------------------------------------
+Step2: create the service  http-service.service.ts
+--------------------------------------------------
+@Injectable(
+ // {providedIn: 'root'}
+ )
+export class HttpServiceService {
+   
+   
+  constructor(public ht:HttpClient) {  }
+   
+  serpostdata(mbr:any):Observable<any>{
+    //const httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json; //charset=UTF-8'})};
+    const headers = new HttpHeaders().set('Content-Type', 'application/json; charset=UTF-8');
+  return this.ht.post("http://localhost:8080/member/insert",mbr,{headers,responseType: 'text'});
+  
+  }
+  getData()
+   {     
+    return this.ht.get("http://localhost:8080/member/info/320/2")          
+   }
+   
+}
+//{responseType:'text' as 'json'}
+-------------------------------------------------------
+Step3: http-post.component.ts
+-------------------------------------------------------
+import { Component, OnInit } from '@angular/core';
+import { HttpClient} from '@angular/common/http'; 
+import { HttpServiceService } from '../http-service.service';
+import { Member } from '../Member';
+
+
+@Component({
+  selector: 'app-http-post',
+  templateUrl: './http-post.component.html',
+  styleUrls: ['./http-post.component.css']
+})
+export class HttpPostComponent implements OnInit {   
+   memberinfo:any
+   public mbr:Member= new Member(0,0,0,'');
+   msg:any;
+   custid:any;
+   clientid:any;
+   mbrid:any;
+   membername:string='';
+   insdata:any;
+  
+  constructor(private ser:HttpServiceService) {
+    ser.getData();
+    this.custid='';
+    this.clientid='';
+    this.mbrid='';
+    this.membername='';
+  
+  }
+   insertdata(){
+    this.mbr.custid=parseInt(this.custid);
+    this.mbr.clientid=parseInt(this.clientid);
+    this.mbr.mbrid=parseInt(this.mbrid);
+    this.mbr.membername=this.membername;
+    var mbrJson = JSON.stringify(this.mbr);
+     
+    this.insdata= this.ser.serpostdata(mbrJson);
+    this.insdata.subscribe((dt:any)=>{
+         this.msg=dt;
+        
+ 
+    }) 
+     alert(mbrJson);
+     console.log(this.msg)
+     //alert(this.msg) ;
+          
+     this.getData();
+  }
+   getData()
+   {  
+    this.custid='';
+    this.clientid='';
+    this.mbrid='';
+    this.membername='';
+    //  this.ht.get("http://localhost:8080/member/info/320/2").subscribe((dt1)=>{
+    //    this.memberinfo=dt1
+    //  });
+       this.ser.getData().subscribe((dt1)=>{
+          this.memberinfo=dt1;})
+       console.log(this.memberinfo);
+   }
+--------------------------------------------------------------------
+Step4: http-post.component.html
+-------------------------------------------------------------------
+<div class="container">
+ <h2> HTTP POST Example</h2>
+  <div style="border: blue;color: brown;">
+   <h2> {{msg}}</h2>
+  </div>
+ <div class="form-group">
+   <label for="custid"> Cust id:</label>
+   <input type="text" placeholder="Enter customer id" id="custid" class="form-control" [(ngModel)] = "custid" />
+</div>
+ <div class="form-group">
+ <label for="clntid"> Client id:</label>
+ <input type="text" placeholder="Enter client id" id="clntid" class="form-control"
+ [(ngModel)] = "clientid"/>
+</div>
+<div class="form-group">
+ <label for="mbrid"> Member id:</label>
+ <input type="text" placeholder="Enter member id" id="mbrid" class="form-control"
+ [(ngModel)] = "mbrid"/>
+</div>
+<div class="form-group">
+    <label for="memname"> Member Name:</label>
+    <input type="text" placeholder="Enter mem name" id="memname" class="form-control"
+    [(ngModel)] = "membername"/>
+</div>
+<div class="form-group">    
+    <input type="button" value="Insert" class="btn btn-primary" (click)="insertdata()"/>
+     &nbsp;&nbsp;
+    <input type="button" value="GetData" class="btn btn-success" (click)="getData()">
+</div>
+  
+
+  <div *ngIf="memberinfo">
+    <div class="container border mt-3">
+     <table border="1px" width="80%" align="center" class="table table-striped" >
+     <tr>
+        <th>S.no</th>
+        <th>Cust ID</th>
+        <th>Client ID</th>
+        <th>Member ID</th>
+        <th>Member Name</th>
+     </tr>
+     <tr *ngFor="let mbr of memberinfo; let i = index ">      
+        <td>{{i+1}}</td>
+        <td>{{mbr.custid}}</td>
+        <td>{{mbr.clientid}}</td>
+        <td>{{mbr.mbrid}}</td>
+        <td>{{mbr.membername}}</td>
+     </tr>
+    </table> 
+    </div> 
+   </div>
+ 
+</div>
+
+------- End of Code --------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
